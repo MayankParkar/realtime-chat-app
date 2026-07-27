@@ -10,6 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const presenceRoutes = require('./routes/presence');
+app.use('/presence', presenceRoutes);
+
 const roomRoutes = require('./routes/rooms');
 app.use('/rooms', roomRoutes);
 
@@ -62,12 +65,21 @@ io.use((socket, next) => {
 });
 
 // Socket.io connection handler
+const PRESENCE_TTL_SECONDS = 30;
+
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}, userId: ${socket.userId}`);
 
+  // Mark user online immediately on connect
+  pubClient.set(`presence:${socket.userId}`, '1', 'EX', PRESENCE_TTL_SECONDS);
+
+  socket.on('heartbeat', () => {
+    // Refresh the TTL so the key doesn't expire while the client is still active
+    pubClient.set(`presence:${socket.userId}`, '1', 'EX', PRESENCE_TTL_SECONDS);
+  });
+
   socket.on('join-room', async (roomId) => {
     try {
-      // Verify this user is actually a member of the room before letting them listen in
       const check = await pool.query(
         'SELECT 1 FROM room_members WHERE room_id = $1 AND user_id = $2',
         [roomId, socket.userId]
@@ -101,8 +113,6 @@ io.on('connection', (socket) => {
       );
 
       const message = result.rows[0];
-
-      // Broadcast to everyone in the room, including the sender
       io.to(roomId).emit('receive-message', message);
     } catch (err) {
       console.error('send-message error:', err);
@@ -112,6 +122,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}, userId: ${socket.userId}`);
+    // Note: we deliberately do NOT delete the presence key here.
+    // If the same user has another tab/device connected, we don't want
+    // to mark them offline just because ONE socket disconnected.
+    // We let the TTL expire naturally if no heartbeats come in.
   });
 });
 
