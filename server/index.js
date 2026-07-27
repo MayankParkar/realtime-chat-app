@@ -119,6 +119,14 @@ io.on('connection', (socket) => {
       socket.emit('error', { message: 'failed to send message' });
     }
   });
+  socket.on('typing-start', ({ roomId }) => {
+    // Broadcast to everyone else in the room EXCEPT the sender
+    socket.to(roomId).emit('user-typing', { userId: socket.userId, roomId });
+  });
+
+  socket.on('typing-stop', ({ roomId }) => {
+    socket.to(roomId).emit('user-stopped-typing', { userId: socket.userId, roomId });
+  });
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}, userId: ${socket.userId}`);
