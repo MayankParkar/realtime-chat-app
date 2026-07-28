@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -79,6 +80,8 @@ function Register() {
         {loading ? 'Registering...' : 'Register'}
         </button>
         </form>
+        <GoogleSignInButton />
+
 
         <p style={styles.footer}>
         Already have an account? <Link to="/login" style={styles.link}>Log In</Link>
@@ -160,6 +163,16 @@ const styles = {
     link: {
         color: 'var(--accent)',
         textDecoration: 'none'
+    },
+    divider: {
+        display: 'flex',
+        alignItems: 'center',
+        margin: '1.25rem 0',
+        color: 'var(--text-muted)',
+        fontSize: '0.8rem'
+    },
+    dividerText: {
+        margin: '0 auto'
     }
 };
 
