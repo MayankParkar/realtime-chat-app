@@ -4,6 +4,7 @@ import api from '../api';
 function Sidebar({ selectedRoomId, onSelectRoom }) {
     const [rooms, setRooms] = useState([]);
     const [newRoomName, setNewRoomName] = useState('');
+    const [joinRoomId, setJoinRoomId] = useState('');
     const [loading, setLoading] = useState(true);
 
     const loadRooms = async () => {
@@ -34,6 +35,19 @@ function Sidebar({ selectedRoomId, onSelectRoom }) {
         }
     };
 
+    const handleJoinRoom = async (e) => {
+        e.preventDefault();
+        if (!joinRoomId.trim()) return;
+
+        try {
+            await api.post(`/rooms/${joinRoomId.trim()}/join`);
+            setJoinRoomId('');
+            loadRooms();
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to join room — check the ID');
+        }
+    };
+
     return (
         <div style={styles.sidebar}>
         <div style={styles.header}>
@@ -49,14 +63,26 @@ function Sidebar({ selectedRoomId, onSelectRoom }) {
                 return (
                     <div
                     key={room.id}
-                    onClick={() => onSelectRoom(room.id)}
                     style={{
                         ...styles.roomItem,
                         ...(isSelected ? styles.roomItemActive : {})
                     }}
                     >
+                    <div onClick={() => onSelectRoom(room.id)} style={styles.roomNameClick}>
                     <span style={styles.roomHash}>#</span>
                     {room.name}
+                    </div>
+                    <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(room.id);
+                        alert(`Room ID copied! Share it with friends:\n${room.id}`);
+                    }}
+                    style={styles.copyBtn}
+                    title="Copy room ID to invite others"
+                    >
+                    ⧉
+                    </button>
                     </div>
                 );
             })
@@ -72,6 +98,17 @@ function Sidebar({ selectedRoomId, onSelectRoom }) {
         style={styles.createInput}
         />
         <button type="submit" style={styles.createBtn}>+</button>
+        </form>
+
+        <form onSubmit={handleJoinRoom} style={styles.createForm}>
+        <input
+        type="text"
+        placeholder="Paste room ID to join"
+        value={joinRoomId}
+        onChange={(e) => setJoinRoomId(e.target.value)}
+        style={styles.createInput}
+        />
+        <button type="submit" style={styles.createBtn}>↵</button>
         </form>
         </div>
     );
@@ -108,10 +145,9 @@ const styles = {
     roomItem: {
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
+        justifyContent: 'space-between',
         padding: '0.55rem 0.75rem',
         borderRadius: 'var(--radius-sm)',
-        cursor: 'pointer',
         fontSize: '0.9rem',
         color: 'var(--text-secondary)',
         marginBottom: '2px'
@@ -123,6 +159,20 @@ const styles = {
     roomHash: {
         color: 'var(--text-muted)',
         fontWeight: 600
+    },
+    roomNameClick: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        flex: 1,
+        cursor: 'pointer'
+    },
+    copyBtn: {
+        background: 'transparent',
+        border: 'none',
+        color: 'var(--text-muted)',
+        fontSize: '0.9rem',
+        padding: '0.2rem 0.4rem'
     },
     createForm: {
         display: 'flex',
