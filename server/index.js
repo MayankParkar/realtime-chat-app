@@ -113,12 +113,22 @@ io.on('connection', (socket) => {
       );
 
       const message = result.rows[0];
+
+      // Resolve the sender's username so the client doesn't need a separate lookup
+      const userResult = await pool.query(
+        'SELECT username FROM users WHERE id = $1',
+        [socket.userId]
+      );
+      message.sender_username = userResult.rows[0]?.username || null;
+
       io.to(roomId).emit('receive-message', message);
     } catch (err) {
       console.error('send-message error:', err);
       socket.emit('error', { message: 'failed to send message' });
     }
   });
+
+
   socket.on('typing-start', ({ roomId }) => {
     // Broadcast to everyone else in the room EXCEPT the sender
     socket.to(roomId).emit('user-typing', { userId: socket.userId, roomId });
