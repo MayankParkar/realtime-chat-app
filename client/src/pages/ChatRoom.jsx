@@ -81,23 +81,29 @@ function ChatRoom() {
     }, [socket, selectedRoomId]);
 
     return (
-        <div style={{ display: 'flex', height: '100vh' }}>
+        <div style={styles.page}>
         <Sidebar selectedRoomId={selectedRoomId} onSelectRoom={setSelectedRoomId} />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between' }}>
-        <span>{connected ? '🟢 Connected' : '🔴 Disconnected'} — {user.username}</span>
-        <button onClick={logout}>Log Out</button>
+        <div style={styles.main}>
+        <div style={styles.header}>
+        <div style={styles.headerLeft}>
+        <span
+        style={{
+            ...styles.statusDot,
+            background: connected ? 'var(--success)' : 'var(--danger)'
+        }}
+        />
+        <span style={styles.headerText}>{user.username}</span>
+        </div>
+        <button onClick={logout} style={styles.logoutBtn}>Log Out</button>
         </div>
 
         {selectedRoomId ? (
             <>
             <MessageList messages={messages} />
-            {typingUsers.length > 0 && (
-                <div style={{ padding: '0 1rem', fontSize: '0.8rem', color: '#888' }}>
-                Someone is typing...
-                </div>
-            )}
+            <div style={styles.typingArea}>
+            {typingUsers.length > 0 && 'Someone is typing...'}
+            </div>
             <MessageInput
             onSend={handleSend}
             onTypingStart={handleTypingStart}
@@ -105,11 +111,71 @@ function ChatRoom() {
             />
             </>
         ) : (
-            <div style={{ padding: '2rem', color: '#888' }}>Select a room to start chatting</div>
+            <div style={styles.emptyState}>Select a room to start chatting</div>
         )}
         </div>
         </div>
     );
 }
+
+const styles = {
+    page: {
+        display: 'flex',
+        height: '100vh',
+        background: 'var(--bg-primary)'
+    },
+    main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0
+    },
+    header: {
+        padding: '0.9rem 1.5rem',
+        borderBottom: '1px solid var(--border-color)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        background: 'var(--bg-secondary)'
+    },
+    headerLeft: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
+    },
+    statusDot: {
+        width: '8px',
+        height: '8px',
+        borderRadius: '50%'
+    },
+    headerText: {
+        fontSize: '0.9rem',
+        fontWeight: 600
+    },
+    logoutBtn: {
+        background: 'transparent',
+        border: '1px solid var(--border-color)',
+        color: 'var(--text-secondary)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '0.4rem 0.85rem',
+        fontSize: '0.8rem'
+    },
+    typingArea: {
+        minHeight: '1.5rem',
+        padding: '0 1.5rem',
+        fontSize: '0.8rem',
+        color: 'var(--text-muted)',
+        fontStyle: 'italic'
+    },
+    emptyState: {
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--text-muted)',
+        fontSize: '0.9rem'
+    }
+};
+
 
 export default ChatRoom;

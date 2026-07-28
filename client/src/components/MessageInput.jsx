@@ -7,14 +7,12 @@ function MessageInput({ onSend, onTypingStart, onTypingStop }) {
     const handleChange = (e) => {
         setContent(e.target.value);
 
-        // Fire typing-start on the first keystroke of a burst
         if (!typingTimeoutRef.current) {
             onTypingStart();
         } else {
             clearTimeout(typingTimeoutRef.current);
         }
 
-        // Reset the "stop typing" timer on every keystroke
         typingTimeoutRef.current = setTimeout(() => {
             onTypingStop();
             typingTimeoutRef.current = null;
@@ -28,7 +26,6 @@ function MessageInput({ onSend, onTypingStart, onTypingStop }) {
         onSend(content);
         setContent('');
 
-        // Sending clears any pending typing state immediately
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
             typingTimeoutRef.current = null;
@@ -37,17 +34,46 @@ function MessageInput({ onSend, onTypingStart, onTypingStop }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', padding: '1rem', borderTop: '1px solid #333' }}>
+        <form onSubmit={handleSubmit} style={styles.form}>
         <input
         type="text"
         value={content}
         onChange={handleChange}
         placeholder="Type a message..."
-        style={{ flex: 1, marginRight: '0.5rem' }}
+        style={styles.input}
         />
-        <button type="submit">Send</button>
+        <button type="submit" style={styles.sendBtn}>Send</button>
         </form>
     );
 }
+
+const styles = {
+    form: {
+        display: 'flex',
+        gap: '0.6rem',
+        padding: '1rem 1.5rem',
+        borderTop: '1px solid var(--border-color)',
+        background: 'var(--bg-secondary)'
+    },
+    input: {
+        flex: 1,
+        background: 'var(--bg-tertiary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        padding: '0.65rem 1rem',
+        color: 'var(--text-primary)',
+        fontSize: '0.9rem',
+        outline: 'none'
+    },
+    sendBtn: {
+        background: 'var(--accent)',
+        color: 'white',
+        border: 'none',
+        borderRadius: 'var(--radius-md)',
+        padding: '0.65rem 1.25rem',
+        fontWeight: 600,
+        fontSize: '0.9rem'
+    }
+};
 
 export default MessageInput;

@@ -8,11 +8,11 @@ function PresenceDot({ userId }) {
         <span
         style={{
             display: 'inline-block',
-            width: '8px',
-            height: '8px',
+            width: '7px',
+            height: '7px',
             borderRadius: '50%',
-            background: online ? '#4caf50' : '#666',
-            marginRight: '4px'
+            background: online ? 'var(--success)' : 'var(--text-muted)',
+            marginRight: '5px'
         }}
         title={online ? 'Online' : 'Offline'}
         />
@@ -28,31 +28,35 @@ function MessageList({ messages }) {
     }, [messages]);
 
     return (
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+        <div style={styles.container}>
         {messages.map((msg) => {
             const isOwnMessage = msg.sender_id === user.id;
             return (
                 <div
                 key={msg.id}
                 style={{
-                    marginBottom: '0.75rem',
+                    ...styles.row,
+                    justifyContent: isOwnMessage ? 'flex-end' : 'flex-start'
+                }}
+                >
+                <div style={{ maxWidth: '65%' }}>
+                <div
+                style={{
+                    ...styles.sender,
                     textAlign: isOwnMessage ? 'right' : 'left'
                 }}
                 >
-                <div style={{ fontSize: '0.75rem', color: '#888' }}>
                 {!isOwnMessage && msg.sender_id && <PresenceDot userId={msg.sender_id} />}
                 {msg.sender_username || 'Deleted User'}
                 </div>
                 <div
                 style={{
-                    display: 'inline-block',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '8px',
-                    background: isOwnMessage ? '#2b5278' : '#333',
-                    maxWidth: '70%'
+                    ...styles.bubble,
+                    ...(isOwnMessage ? styles.bubbleOwn : styles.bubbleOther)
                 }}
                 >
                 {msg.content}
+                </div>
                 </div>
                 </div>
             );
@@ -61,5 +65,44 @@ function MessageList({ messages }) {
         </div>
     );
 }
+
+const styles = {
+    container: {
+        flex: 1,
+        overflowY: 'auto',
+        padding: '1.25rem 1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.9rem'
+    },
+    row: {
+        display: 'flex',
+        width: '100%'
+    },
+    sender: {
+        fontSize: '0.72rem',
+        color: 'var(--text-muted)',
+        marginBottom: '0.25rem',
+        display: 'flex',
+        alignItems: 'center'
+    },
+    bubble: {
+        padding: '0.55rem 0.85rem',
+        borderRadius: 'var(--radius-md)',
+        fontSize: '0.9rem',
+        lineHeight: 1.4,
+        wordBreak: 'break-word'
+    },
+    bubbleOwn: {
+        background: 'var(--accent)',
+        color: 'white',
+        borderBottomRightRadius: '4px'
+    },
+    bubbleOther: {
+        background: 'var(--bg-tertiary)',
+        color: 'var(--text-primary)',
+        borderBottomLeftRadius: '4px'
+    }
+};
 
 export default MessageList;

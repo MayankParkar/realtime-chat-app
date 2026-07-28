@@ -28,45 +28,127 @@ function Sidebar({ selectedRoomId, onSelectRoom }) {
         try {
             await api.post('/rooms', { name: newRoomName });
             setNewRoomName('');
-            loadRooms(); // refresh the list to include the new room
+            loadRooms();
         } catch (err) {
             console.error('Failed to create room:', err);
         }
     };
 
-    if (loading) return <div>Loading rooms...</div>;
-
     return (
-        <div style={{ width: '250px', borderRight: '1px solid #333', padding: '1rem' }}>
-        <h3>My Rooms</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-        {rooms.map((room) => (
-            <li
-            key={room.id}
-            onClick={() => onSelectRoom(room.id)}
-            style={{
-                padding: '0.5rem',
-                cursor: 'pointer',
-                background: room.id === selectedRoomId ? '#333' : 'transparent',
-                borderRadius: '4px'
-            }}
-            >
-            {room.name}
-            </li>
-        ))}
-        </ul>
+        <div style={styles.sidebar}>
+        <div style={styles.header}>
+        <h2 style={styles.heading}>Rooms</h2>
+        </div>
 
-        <form onSubmit={handleCreateRoom} style={{ marginTop: '1rem' }}>
+        <div style={styles.roomList}>
+        {loading ? (
+            <p style={styles.loadingText}>Loading...</p>
+        ) : (
+            rooms.map((room) => {
+                const isSelected = room.id === selectedRoomId;
+                return (
+                    <div
+                    key={room.id}
+                    onClick={() => onSelectRoom(room.id)}
+                    style={{
+                        ...styles.roomItem,
+                        ...(isSelected ? styles.roomItemActive : {})
+                    }}
+                    >
+                    <span style={styles.roomHash}>#</span>
+                    {room.name}
+                    </div>
+                );
+            })
+        )}
+        </div>
+
+        <form onSubmit={handleCreateRoom} style={styles.createForm}>
         <input
         type="text"
         placeholder="New room name"
         value={newRoomName}
         onChange={(e) => setNewRoomName(e.target.value)}
+        style={styles.createInput}
         />
-        <button type="submit">Create</button>
+        <button type="submit" style={styles.createBtn}>+</button>
         </form>
         </div>
     );
 }
+
+const styles = {
+    sidebar: {
+        width: '260px',
+        minWidth: '260px',
+        background: 'var(--bg-secondary)',
+        borderRight: '1px solid var(--border-color)',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    },
+    header: {
+        padding: '1.25rem 1.25rem 1rem'
+    },
+    heading: {
+        margin: 0,
+        fontSize: '1.1rem',
+        fontWeight: 600
+    },
+    roomList: {
+        flex: 1,
+        overflowY: 'auto',
+        padding: '0 0.5rem'
+    },
+    loadingText: {
+        color: 'var(--text-muted)',
+        fontSize: '0.85rem',
+        padding: '0 0.75rem'
+    },
+    roomItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.55rem 0.75rem',
+        borderRadius: 'var(--radius-sm)',
+        cursor: 'pointer',
+        fontSize: '0.9rem',
+        color: 'var(--text-secondary)',
+        marginBottom: '2px'
+    },
+    roomItemActive: {
+        background: 'var(--accent-muted)',
+        color: 'var(--text-primary)'
+    },
+    roomHash: {
+        color: 'var(--text-muted)',
+        fontWeight: 600
+    },
+    createForm: {
+        display: 'flex',
+        gap: '0.5rem',
+        padding: '1rem',
+        borderTop: '1px solid var(--border-color)'
+    },
+    createInput: {
+        flex: 1,
+        background: 'var(--bg-tertiary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '0.5rem 0.65rem',
+        color: 'var(--text-primary)',
+        fontSize: '0.85rem',
+        outline: 'none'
+    },
+    createBtn: {
+        background: 'var(--accent)',
+        color: 'white',
+        border: 'none',
+        borderRadius: 'var(--radius-sm)',
+        width: '34px',
+        fontSize: '1.1rem',
+        fontWeight: 600
+    }
+};
 
 export default Sidebar;
