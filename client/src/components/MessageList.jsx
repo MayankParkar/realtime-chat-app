@@ -1,5 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { usePresence } from '../hooks/usePresence';
+
+function PresenceDot({ userId }) {
+    const online = usePresence(userId);
+    return (
+        <span
+        style={{
+            display: 'inline-block',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: online ? '#4caf50' : '#666',
+            marginRight: '4px'
+        }}
+        title={online ? 'Online' : 'Offline'}
+        />
+    );
+}
 
 function MessageList({ messages }) {
     const { user } = useAuth();
@@ -22,6 +40,7 @@ function MessageList({ messages }) {
                 }}
                 >
                 <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                {!isOwnMessage && msg.sender_id && <PresenceDot userId={msg.sender_id} />}
                 {msg.sender_username || 'Deleted User'}
                 </div>
                 <div
