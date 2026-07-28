@@ -7,7 +7,11 @@ const Redis = require('ioredis');
 const pool = require('./db/pool');
 
 const app = express();
-app.use(cors());
+const allowedOrigins = process.env.CLIENT_URL
+? [process.env.CLIENT_URL]
+: ['http://localhost:5173'];
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 const presenceRoutes = require('./routes/presence');
@@ -23,7 +27,7 @@ const { createAdapter } = require('@socket.io/redis-adapter');
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' } // we'll lock this down later
+  cors: { origin: allowedOrigins }
 });
 
 // Redis adapter needs its own pub and sub clients — Redis connections
